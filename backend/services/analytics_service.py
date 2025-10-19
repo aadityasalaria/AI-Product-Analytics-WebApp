@@ -1,11 +1,19 @@
+"""Analytics service.
+
+Aggregates product data and computes lightweight analytics for the UI.
+"""
+
+from typing import List, Dict, Tuple, Optional
+
 import numpy as np
 import pandas as pd
-from typing import List, Dict, Tuple, Optional
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+
+# Local services/config
+from core.config import settings
 from services.product_service import product_service
 from services.recommendation_service import recommendation_service
-from core.config import settings
 
 class AnalyticsService:
     def __init__(self):
@@ -26,8 +34,8 @@ class AnalyticsService:
                     'n_components': n_components
                 }
             
-            # For this implementation, we'll create dummy embeddings
-            # In a real scenario, you'd store and retrieve actual embeddings
+            # Generate dummy embeddings for visualization only.
+            # In production, retrieve persisted embeddings instead.
             n_products = len(all_products)
             dummy_embeddings = np.random.randn(n_products, settings.EMBEDDING_DIMENSION)
             
@@ -236,8 +244,7 @@ class AnalyticsService:
     def _get_recommendation_insights(self) -> Dict:
         """Get insights about the recommendation system."""
         try:
-            # This would typically involve analyzing user interactions
-            # For now, we'll return basic insights
+            # Placeholder values; wire up analytics events in production.
             return {
                 'total_recommendations_generated': 0,  # Would track in production
                 'average_similarity_score': 0.8,
@@ -272,3 +279,4 @@ class AnalyticsService:
 
 # Global instance
 analytics_service = AnalyticsService()
+

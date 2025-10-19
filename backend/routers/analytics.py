@@ -1,6 +1,14 @@
-from fastapi import APIRouter, HTTPException, Query
+"""Analytics API routes.
+
+Provides endpoints for embeddings visualization and system analytics.
+"""
+
 from typing import Dict, List, Optional
+
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
+
+# Local services
 from services.analytics_service import analytics_service
 
 router = APIRouter()
@@ -112,3 +120,4 @@ async def get_recommendation_insights():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

@@ -1,13 +1,21 @@
+"""FastAPI application entrypoint.
+
+Sets up CORS, health checks, and mounts product and analytics routers.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Local routers
 from routers import products, analytics
 
 app = FastAPI(title="Product Recommendation API", version="1.0.0")
 
 origins = [
-    "http://localhost:3000/",  # Next.js frontend
-    "http://localhost:3001/",  # Alternative frontend port
-    "*",  # Allow all origins for development
+    # Development origins; keep permissive for local iteration
+    "http://localhost:3000/",
+    "http://localhost:3001/",
+    "*",  # TODO: tighten CORS in production
 ]
 
 app.add_middleware(
@@ -18,16 +26,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Define a root endpoint
 @app.get("/")
 async def read_root():
+    """Basic service descriptor for quick smoke tests."""
     return {"message": "Product Recommendation API", "version": "1.0.0"}
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
+    """Liveness probe endpoint."""
     return {"status": "healthy"}
 
-# Include routers
 app.include_router(products.router, prefix="/api/products", tags=["Products"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
+

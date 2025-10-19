@@ -1,12 +1,20 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Query, Depends
-from typing import List, Dict, Optional
-from pydantic import BaseModel
-from services.product_service import product_service
-from services.recommendation_service import recommendation_service
-from services.genai_service import genai_service
-from core.dependencies import get_dataset_directory
+"""Product API routes.
+
+Handles dataset uploads, product retrieval, recommendations, and GenAI endpoints.
+"""
+
 import os
 import json
+from typing import List, Dict, Optional
+
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Query, Depends
+from pydantic import BaseModel
+
+# Local services and dependencies
+from core.dependencies import get_dataset_directory
+from services.genai_service import genai_service
+from services.product_service import product_service
+from services.recommendation_service import recommendation_service
 
 router = APIRouter()
 
@@ -45,14 +53,14 @@ async def upload_dataset(
 ):
     """Upload and process a furniture dataset."""
     try:
-        # Validate file type
+        # Basic file type check; parse later according to extension
         if not file.filename.endswith(('.csv', '.json')):
             raise HTTPException(
                 status_code=400,
                 detail="Only CSV and JSON files are supported"
             )
         
-        # Save uploaded file
+        # Persist upload for downstream processing
         file_path = os.path.join(dataset_dir, file.filename)
         with open(file_path, "wb") as buffer:
             content = await file.read()
@@ -245,3 +253,4 @@ async def get_embeddings_for_analytics():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

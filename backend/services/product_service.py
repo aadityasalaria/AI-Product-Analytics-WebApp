@@ -1,12 +1,21 @@
-import pandas as pd
-import numpy as np
-from typing import List, Dict, Optional, Tuple
-from sentence_transformers import SentenceTransformer
-from pinecone import Pinecone, ServerlessSpec
-from core.config import settings
+"""Product data and vector store utilities.
+
+Responsible for parsing raw product data, generating embeddings, and
+interacting with the Pinecone vector database.
+"""
+
+import ast
 import json
 import os
 from pathlib import Path
+from typing import List, Dict, Optional, Tuple
+
+import numpy as np
+import pandas as pd
+from pinecone import Pinecone, ServerlessSpec
+from sentence_transformers import SentenceTransformer
+
+from core.config import settings
 
 class ProductService:
     def __init__(self):
@@ -14,6 +23,79 @@ class ProductService:
         self.embedding_model = SentenceTransformer(settings.EMBEDDING_MODEL)
         self.index_name = settings.PINECONE_INDEX_NAME
         self.products_data = []
+        
+    def clean_price(self, price_str: str) -> float:
+        """Clean price string and convert to float."""
+        # Handle None, NaN, or empty values first
+        if price_str is None or str(price_str).lower() in ['nan', 'none', '', 'null']:
+            return 0.0
+        
+        if isinstance(price_str, (int, float)):
+            try:
+                if pd.isna(price_str):
+                    return 0.0
+                return float(price_str)
+            except (TypeError, ValueError):
+                return 0.0
+        
+        # Convert to string and clean
+        price_str = str(price_str).strip()
+        if not price_str or price_str.lower() in ['nan', 'none', '', 'null']:
+            return 0.0
+        
+        # Remove dollar signs, commas, and other non-numeric characters except decimal point
+        cleaned = price_str.replace('$', '').replace(',', '').strip()
+        
+        try:
+            return float(cleaned)
+        except ValueError:
+            # If conversion fails, return 0.0
+            print(f"Warning: Could not convert price '{price_str}' to float, using 0.0")
+            return 0.0
+    
+    def parse_categories(self, categories_str: str) -> str:
+        """Parse categories string and return a clean string."""
+        # Handle None, NaN, or empty values first
+        if categories_str is None or str(categories_str).lower() in ['nan', 'none', '', 'null']:
+            return "Unknown"
+        
+        # Convert to string
+        categories_str = str(categories_str).strip()
+        if not categories_str or categories_str.lower() in ['nan', 'none', '', 'null']:
+            return "Unknown"
+        
+        # If it's already a string representation of a list, parse it
+        if categories_str.startswith('['):
+            try:
+                import ast
+                categories_list = ast.literal_eval(categories_str)
+                return ', '.join(categories_list) if isinstance(categories_list, list) else categories_str
+            except:
+                return categories_str
+        
+        return categories_str
+    
+    def parse_images(self, images_str: str) -> str:
+        """Parse images string and return the first image URL."""
+        # Handle None, NaN, or empty values first
+        if images_str is None or str(images_str).lower() in ['nan', 'none', '', 'null']:
+            return ""
+        
+        # Convert to string
+        images_str = str(images_str).strip()
+        if not images_str or images_str.lower() in ['nan', 'none', '', 'null']:
+            return ""
+        
+        # If it's already a string representation of a list, parse it
+        if images_str.startswith('['):
+            try:
+                import ast
+                images_list = ast.literal_eval(images_str)
+                return images_list[0] if isinstance(images_list, list) and len(images_list) > 0 else ""
+            except:
+                return images_str
+        
+        return images_str
         
     def get_or_create_index(self) -> str:
         """Get an existing index or create a new one if it doesn't exist."""
@@ -40,15 +122,33 @@ class ProductService:
                 raise ValueError("Unsupported file format. Use CSV or JSON.")
             
             # Validate required columns
-            required_columns = ['id', 'name', 'category', 'price', 'description']
+            required_columns = ['uniq_id', 'title', 'categories', 'price', 'description']
             missing_columns = [col for col in required_columns if col not in df.columns]
             if missing_columns:
                 raise ValueError(f"Missing required columns: {missing_columns}")
             
             # Convert to list of dictionaries
+            # Convert to list of dictionaries
             products = df.to_dict('records')
             self.products_data = products
             
+            # Parse selected fields into convenient shapes
+            for product in products:
+                # Parse categories if it's a string representation of a list
+                if isinstance(product.get('categories'), str) and product['categories'].startswith('['):
+                    try:
+                        product['categories'] = ast.literal_eval(product['categories'])
+                    except:
+                        pass  # Keep as string if parsing fails
+                
+                # Parse images if it's a string representation of a list
+                if isinstance(product.get('images'), str) and product['images'].startswith('['):
+                    try:
+                        images_list = ast.literal_eval(product['images'])
+                        product['image_url'] = images_list[0] if images_list else ''
+                    except:
+                        product['image_url'] = product.get('images', '')
+                    
             return products
             
         except Exception as e:
@@ -68,23 +168,26 @@ class ProductService:
             vectors = []
             for i, product in enumerate(products):
                 # Create text for embedding (combine name, category, description)
-                text_for_embedding = f"{product['name']} {product['category']} {product.get('description', '')}"
+                text_for_embedding = f"{product.get('title', '')} {self.parse_categories(product.get('categories', ''))} {product.get('description', '')}"
                 
                 # Generate embedding
                 embedding = self.embedding_model.encode([text_for_embedding])[0]
                 
                 # Prepare metadata
                 metadata = {
-                    'name': product['name'],
-                    'category': product['category'],
-                    'price': float(product['price']),
-                    'description': product.get('description', ''),
-                    'image_url': product.get('image_url', ''),
-                    'product_id': str(product['id'])
+                    'name': str(product.get('title', 'Unknown Product')),
+                    'category': self.parse_categories(product.get('categories', '')),
+                    'price': self.clean_price(product.get('price', 0)),
+                    'description': str(product.get('description', '')),
+                    'image_url': self.parse_images(product.get('images', '')),
+                    'product_id': str(product.get('uniq_id', f'unknown_{i}')),
+                    'brand': str(product.get('brand', '')),
+                    'material': str(product.get('material', '')),
+                    'color': str(product.get('color', ''))
                 }
                 
                 vectors.append({
-                    'id': str(product['id']),
+                    'id': str(product['uniq_id']),
                     'values': embedding.tolist(),
                     'metadata': metadata
                 })
@@ -214,3 +317,4 @@ class ProductService:
 
 # Global instance
 product_service = ProductService()
+

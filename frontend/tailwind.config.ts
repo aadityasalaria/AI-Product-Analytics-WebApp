@@ -18,6 +18,10 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        gantari: ['Gantari', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -52,6 +56,13 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Ikarus 3D Brand Colors
+        ikarus: {
+          black: '#0a0c10',
+          blue: '#015EF1',
+          'blue-light': '#489BE1',
+          white: '#ffffff',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -78,3 +89,4 @@ const config = {
 } satisfies Config
 
 export default config
+

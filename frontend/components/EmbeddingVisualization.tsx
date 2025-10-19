@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { CartesianGrid, Cell, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis } from "recharts";
 import { Eye, RefreshCw, Settings } from "lucide-react";
 import { getEmbeddings2D } from "@/lib/api";
 
@@ -33,6 +33,9 @@ interface Embedding2DResponse {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
+/**
+ * 2D embedding scatter plot with simple controls.
+ */
 export default function EmbeddingVisualization() {
   const [data, setData] = useState<EmbeddingPoint[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +95,7 @@ export default function EmbeddingVisualization() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full"></div>
           </div>
         </CardContent>
       </Card>
@@ -109,9 +112,9 @@ export default function EmbeddingVisualization() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-red-500 py-8">
+          <div className="text-center text-destructive py-8">
             <p>{error || "No embedding data available"}</p>
-            <Button onClick={fetchEmbeddings} className="mt-4">
+            <Button onClick={fetchEmbeddings} className="mt-4" variant="ikarus">
               Retry
             </Button>
           </div>
@@ -151,14 +154,14 @@ export default function EmbeddingVisualization() {
         </CardHeader>
         <CardContent>
           {showSettings && (
-            <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-4 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center gap-4">
                 <div>
-                  <label className="text-sm font-medium">Method</label>
+                  <label className="text-sm font-medium text-foreground">Method</label>
                   <select
                     value={method}
                     onChange={(e) => setMethod(e.target.value as 'pca' | 'tsne')}
-                    className="ml-2 p-1 border rounded"
+                    className="ml-2 p-1 border border-input bg-background text-foreground rounded"
                   >
                     <option value="pca">PCA</option>
                     <option value="tsne">t-SNE</option>
@@ -193,10 +196,10 @@ export default function EmbeddingVisualization() {
                     if (active && payload && payload.length) {
                       const point = payload[0].payload;
                       return (
-                        <div className="bg-white p-3 border rounded shadow-lg">
-                          <p className="font-semibold">{point.name}</p>
-                          <p className="text-sm text-gray-600">Category: {point.category}</p>
-                          <p className="text-sm text-gray-600">Price: ${point.price}</p>
+                        <div className="bg-card p-3 border border-border rounded shadow-lg">
+                          <p className="font-semibold text-card-foreground">{point.name}</p>
+                          <p className="text-sm text-muted-foreground">Category: {point.category}</p>
+                          <p className="text-sm text-muted-foreground">Price: ${point.price}</p>
                         </div>
                       );
                     }
@@ -221,7 +224,7 @@ export default function EmbeddingVisualization() {
 
           {/* Legend */}
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Categories</h4>
+            <h4 className="text-sm font-medium mb-2 text-foreground">Categories</h4>
             <div className="flex flex-wrap gap-2">
               {[...new Set(data.map(d => d.category))].map((category, index) => (
                 <div key={category} className="flex items-center gap-1">
@@ -229,7 +232,7 @@ export default function EmbeddingVisualization() {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: getCategoryColor(category) }}
                   />
-                  <span className="text-xs capitalize">{category}</span>
+                  <span className="text-xs capitalize text-foreground">{category}</span>
                 </div>
               ))}
             </div>
@@ -237,22 +240,22 @@ export default function EmbeddingVisualization() {
 
           {/* Selected Point Details */}
           {selectedPoint && (
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold text-blue-900">Selected Product</h4>
-              <p className="text-sm text-blue-700">Name: {selectedPoint.name}</p>
-              <p className="text-sm text-blue-700">Category: {selectedPoint.category}</p>
-              <p className="text-sm text-blue-700">Price: ${selectedPoint.price}</p>
-              <p className="text-sm text-blue-700">Coordinates: ({selectedPoint.x.toFixed(2)}, {selectedPoint.y.toFixed(2)})</p>
+            <div className="mt-4 p-4 bg-primary/10 rounded-lg">
+              <h4 className="font-semibold text-primary">Selected Product</h4>
+              <p className="text-sm text-foreground">Name: {selectedPoint.name}</p>
+              <p className="text-sm text-foreground">Category: {selectedPoint.category}</p>
+              <p className="text-sm text-foreground">Price: ${selectedPoint.price}</p>
+              <p className="text-sm text-foreground">Coordinates: ({selectedPoint.x.toFixed(2)}, {selectedPoint.y.toFixed(2)})</p>
             </div>
           )}
 
           {/* Summary Stats */}
           <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="font-medium">Total Points:</span> {data.length}
+              <span className="font-medium text-foreground">Total Points:</span> <span className="text-muted-foreground">{data.length}</span>
             </div>
             <div>
-              <span className="font-medium">Method:</span> {method.toUpperCase()}
+              <span className="font-medium text-foreground">Method:</span> <span className="text-muted-foreground">{method.toUpperCase()}</span>
             </div>
           </div>
         </CardContent>
@@ -260,3 +263,4 @@ export default function EmbeddingVisualization() {
     </div>
   );
 }
+

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Package, DollarSign, Star } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { DollarSign, Package, Star, TrendingUp } from "lucide-react";
 import { getAnalyticsMetrics, getCategoryAnalytics, getPriceAnalysis } from "@/lib/api";
 
 interface AnalyticsMetrics {
@@ -18,6 +18,9 @@ interface AnalyticsMetrics {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
+/**
+ * Analytics widgets showing high-level system metrics.
+ */
 export default function MetricsDashboard() {
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,7 +51,7 @@ export default function MetricsDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin h-8 w-8 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+            <div className="animate-spin h-8 w-8 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full"></div>
           </div>
         </CardContent>
       </Card>
@@ -62,9 +65,9 @@ export default function MetricsDashboard() {
           <CardTitle>Analytics Dashboard</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-red-500 py-8">
+          <div className="text-center text-destructive py-8">
             <p>{error || "Failed to load analytics data"}</p>
-            <Button onClick={fetchMetrics} className="mt-4">
+            <Button onClick={fetchMetrics} className="mt-4" variant="ikarus">
               Retry
             </Button>
           </div>
@@ -97,24 +100,24 @@ export default function MetricsDashboard() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{metrics.total_products}</div>
-              <div className="text-sm text-gray-600">Total Products</div>
+              <div className="text-2xl font-bold text-primary">{metrics.total_products}</div>
+              <div className="text-sm text-muted-foreground">Total Products</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{Object.keys(metrics.categories).length}</div>
-              <div className="text-sm text-gray-600">Categories</div>
+              <div className="text-2xl font-bold text-green-500">{Object.keys(metrics.categories).length}</div>
+              <div className="text-sm text-muted-foreground">Categories</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-purple-500">
                 ${Math.round(metrics.price_statistics.mean || 0)}
               </div>
-              <div className="text-sm text-gray-600">Avg Price</div>
+              <div className="text-sm text-muted-foreground">Avg Price</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-orange-500">
                 {Math.round((metrics.recommendation_insights.recommendation_accuracy || 0) * 100)}%
               </div>
-              <div className="text-sm text-gray-600">Accuracy</div>
+              <div className="text-sm text-muted-foreground">Accuracy</div>
             </div>
           </div>
         </CardContent>
@@ -184,28 +187,28 @@ export default function MetricsDashboard() {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-lg font-semibold text-green-600">
+              <div className="text-lg font-semibold text-green-500">
                 ${Math.round(metrics.price_statistics.min || 0)}
               </div>
-              <div className="text-sm text-gray-600">Min Price</div>
+              <div className="text-sm text-muted-foreground">Min Price</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-red-600">
+              <div className="text-lg font-semibold text-red-500">
                 ${Math.round(metrics.price_statistics.max || 0)}
               </div>
-              <div className="text-sm text-gray-600">Max Price</div>
+              <div className="text-sm text-muted-foreground">Max Price</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-blue-600">
+              <div className="text-lg font-semibold text-primary">
                 ${Math.round(metrics.price_statistics.mean || 0)}
               </div>
-              <div className="text-sm text-gray-600">Average</div>
+              <div className="text-sm text-muted-foreground">Average</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-purple-600">
+              <div className="text-lg font-semibold text-purple-500">
                 ${Math.round(metrics.price_statistics.median || 0)}
               </div>
-              <div className="text-sm text-gray-600">Median</div>
+              <div className="text-sm text-muted-foreground">Median</div>
             </div>
           </div>
         </CardContent>
@@ -213,3 +216,4 @@ export default function MetricsDashboard() {
     </div>
   );
 }
+

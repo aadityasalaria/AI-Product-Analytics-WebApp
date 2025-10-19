@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Send, Sparkles, TrendingUp, Filter } from "lucide-react";
+import { Filter, Send, Sparkles, TrendingUp } from "lucide-react";
 import ProductCard from "./ProductCard";
 import { getRecommendations, getTrendingProducts } from "@/lib/api";
 
@@ -25,6 +25,9 @@ interface Product {
   recommendation_reason?: string;
 }
 
+/**
+ * Chat-like UI that fetches recommendations and trending items.
+ */
 export default function ProductRecommendationChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -113,12 +116,12 @@ export default function ProductRecommendationChat() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat Interface */}
-        <div className="lg:col-span-2">
+        {/* Chat Interface (1/3) */}
+        <div className="lg:col-span-1 order-2 lg:order-1">
           <Card className="h-[600px] flex flex-col">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+            <CardHeader className="ikarus-gradient text-white rounded-t-lg">
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
                 Product Recommendation Chat
@@ -131,8 +134,8 @@ export default function ProductRecommendationChat() {
                 className="flex-1 p-4 overflow-y-auto space-y-4"
               >
                 {messages.length === 0 && (
-                  <div className="text-center text-gray-500 py-8">
-                    <p className="text-lg mb-2">Welcome to ProductRec!</p>
+                  <div className="text-center text-muted-foreground py-8">
+                    <p className="text-lg mb-2">Welcome to Ikarus 3D!</p>
                     <p>Ask me to find furniture like "modern sofas under $1000" or "minimalist desks"</p>
                   </div>
                 )}
@@ -145,8 +148,8 @@ export default function ProductRecommendationChat() {
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         message.role === "user"
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100 text-gray-800"
+                          ? "ikarus-gradient text-white"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
@@ -159,9 +162,9 @@ export default function ProductRecommendationChat() {
                 
                 {isLoading && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg">
+                    <div className="bg-muted text-muted-foreground px-4 py-2 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+                        <div className="animate-spin h-4 w-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full"></div>
                         <span>Finding recommendations...</span>
                       </div>
                     </div>
@@ -170,7 +173,7 @@ export default function ProductRecommendationChat() {
               </div>
 
               {/* Input Area */}
-              <div className="p-4 border-t bg-gray-50">
+              <div className="p-4 border-t bg-muted/50">
                 <div className="flex gap-2">
                   <Input
                     value={input}
@@ -183,7 +186,7 @@ export default function ProductRecommendationChat() {
                   <Button
                     onClick={handleSend}
                     disabled={isLoading || !input.trim()}
-                    className="bg-blue-500 hover:bg-blue-600"
+                    variant="ikarus"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
@@ -214,14 +217,14 @@ export default function ProductRecommendationChat() {
 
                 {/* Filters */}
                 {showFilters && (
-                  <div className="mt-3 p-3 bg-white rounded-lg border">
+                  <div className="mt-3 p-3 bg-card rounded-lg border border-border">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
-                        <label className="text-sm font-medium">Category</label>
+                        <label className="text-sm font-medium text-foreground">Category</label>
                         <select
                           value={filters.category}
                           onChange={(e) => setFilters({...filters, category: e.target.value})}
-                          className="w-full mt-1 p-2 border rounded-md"
+                          className="w-full mt-1 p-2 border border-input bg-background text-foreground rounded-md"
                         >
                           <option value="">All Categories</option>
                           <option value="sofa">Sofa</option>
@@ -233,7 +236,7 @@ export default function ProductRecommendationChat() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-sm font-medium">Min Price</label>
+                        <label className="text-sm font-medium text-foreground">Min Price</label>
                         <Input
                           type="number"
                           placeholder="0"
@@ -243,7 +246,7 @@ export default function ProductRecommendationChat() {
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium">Max Price</label>
+                        <label className="text-sm font-medium text-foreground">Max Price</label>
                         <Input
                           type="number"
                           placeholder="1000"
@@ -260,9 +263,9 @@ export default function ProductRecommendationChat() {
           </Card>
         </div>
 
-        {/* Recommendations */}
-        <div className="lg:col-span-1">
-          <Card className="h-[600px]">
+        {/* Recommendations (2/3) */}
+        <div className="lg:col-span-2 order-1 lg:order-2">
+          <Card className="min-h-[600px] h-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
@@ -271,13 +274,13 @@ export default function ProductRecommendationChat() {
             </CardHeader>
             <CardContent className="overflow-y-auto">
               {recommendations.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
+                <div className="text-center text-muted-foreground py-8">
                   <p>No recommendations yet.</p>
                   <p className="text-sm">Try asking for furniture recommendations!</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {recommendations.map((product) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {recommendations.slice(0, 5).map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
@@ -289,3 +292,4 @@ export default function ProductRecommendationChat() {
     </div>
   );
 }
+

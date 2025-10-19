@@ -1,3 +1,4 @@
+// Central API base; override via NEXT_PUBLIC_API_URL at runtime
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export interface RecommendationRequest {
@@ -72,6 +73,7 @@ export interface Embedding2DResponse {
 }
 
 // API Functions
+/** Fetch recommendations for a user query. */
 export async function getRecommendations(request: RecommendationRequest): Promise<RecommendationResponse> {
   const response = await fetch(`${API_BASE_URL}/api/products/recommend`, {
     method: 'POST',
@@ -88,6 +90,7 @@ export async function getRecommendations(request: RecommendationRequest): Promis
   return response.json();
 }
 
+/** Fetch trending products (simple proxy metric). */
 export async function getTrendingProducts(top_k: number = 10): Promise<TrendingResponse> {
   const response = await fetch(`${API_BASE_URL}/api/products/trending?top_k=${top_k}`);
 
@@ -98,6 +101,7 @@ export async function getTrendingProducts(top_k: number = 10): Promise<TrendingR
   return response.json();
 }
 
+/** Fetch products similar to a given product. */
 export async function getSimilarProducts(productId: string, top_k: number = 5): Promise<{similar_products: Product[]}> {
   const response = await fetch(`${API_BASE_URL}/api/products/${productId}/similar?top_k=${top_k}`);
 
@@ -108,6 +112,7 @@ export async function getSimilarProducts(productId: string, top_k: number = 5): 
   return response.json();
 }
 
+/** Fetch products within a category with optional price filters. */
 export async function getCategoryProducts(category: string, top_k: number = 10, priceMin?: number, priceMax?: number): Promise<{products: Product[]}> {
   const params = new URLSearchParams({
     top_k: top_k.toString(),
@@ -124,6 +129,7 @@ export async function getCategoryProducts(category: string, top_k: number = 10, 
   return response.json();
 }
 
+/** Ask backend to generate/enhance a product description. */
 export async function generateProductDescription(request: GenerateDescriptionRequest): Promise<GenerateDescriptionResponse> {
   const response = await fetch(`${API_BASE_URL}/api/products/generate-description`, {
     method: 'POST',
@@ -140,6 +146,7 @@ export async function generateProductDescription(request: GenerateDescriptionReq
   return response.json();
 }
 
+/** Fetch a paginated list of products. */
 export async function getAllProducts(limit: number = 100, offset: number = 0): Promise<{products: Product[]}> {
   const response = await fetch(`${API_BASE_URL}/api/products/all?limit=${limit}&offset=${offset}`);
 
@@ -150,6 +157,7 @@ export async function getAllProducts(limit: number = 100, offset: number = 0): P
   return response.json();
 }
 
+/** Fetch a single product by id. */
 export async function getProduct(productId: string): Promise<Product> {
   const response = await fetch(`${API_BASE_URL}/api/products/${productId}`);
 
@@ -161,6 +169,7 @@ export async function getProduct(productId: string): Promise<Product> {
 }
 
 // Analytics API Functions
+/** Analytics: overall metrics */
 export async function getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/metrics`);
 
@@ -171,6 +180,7 @@ export async function getAnalyticsMetrics(): Promise<AnalyticsMetrics> {
   return response.json();
 }
 
+/** Analytics: 2D embedding coordinates for visualization */
 export async function getEmbeddings2D(method: string = 'pca', nComponents: number = 2): Promise<Embedding2DResponse> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/embeddings-2d?method=${method}&n_components=${nComponents}`);
 
@@ -181,6 +191,7 @@ export async function getEmbeddings2D(method: string = 'pca', nComponents: numbe
   return response.json();
 }
 
+/** Analytics: similarity breakdown for a product */
 export async function getSimilarityAnalysis(productId: string): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/similarity/${productId}`);
 
@@ -191,6 +202,7 @@ export async function getSimilarityAnalysis(productId: string): Promise<any> {
   return response.json();
 }
 
+/** Analytics: aggregate recommendation quality */
 export async function getRecommendationQuality(): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/quality`);
 
@@ -201,6 +213,7 @@ export async function getRecommendationQuality(): Promise<any> {
   return response.json();
 }
 
+/** Analytics: category insights */
 export async function getCategoryAnalytics(): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/categories`);
 
@@ -211,6 +224,7 @@ export async function getCategoryAnalytics(): Promise<any> {
   return response.json();
 }
 
+/** Analytics: price distributions */
 export async function getPriceAnalysis(): Promise<any> {
   const response = await fetch(`${API_BASE_URL}/api/analytics/price-analysis`);
 
@@ -222,6 +236,7 @@ export async function getPriceAnalysis(): Promise<any> {
 }
 
 // Upload function for dataset
+/** Upload a CSV/JSON dataset to the backend. */
 export async function uploadDataset(file: File): Promise<any> {
   const formData = new FormData();
   formData.append('file', file);
@@ -237,3 +252,4 @@ export async function uploadDataset(file: File): Promise<any> {
 
   return response.json();
 }
+

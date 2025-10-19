@@ -5,7 +5,7 @@ langchain
 openai
 python-multipart
 langchain_community
-pinecone-client
+pinecone
 
 # ML and Data Science libraries
 transformers

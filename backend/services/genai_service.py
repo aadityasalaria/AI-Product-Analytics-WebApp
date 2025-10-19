@@ -1,7 +1,13 @@
-from transformers import pipeline, GPT2LMHeadModel, GPT2Tokenizer
-from typing import Dict, Optional
-import torch
+"""Lightweight wrapper around a text-generation model for product copy.
+
+Falls back to simple template-based generation if the model is unavailable.
+"""
+
 import re
+from typing import Dict, Optional
+
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, pipeline
+
 from core.config import settings
 
 class GenAIService:
@@ -36,6 +42,7 @@ class GenAIService:
             )
             
         except Exception as e:
+            # Log and continue with fallback
             print(f"Warning: Could not load {self.model_name}. Using fallback generator.")
             self.generator = None
     
@@ -218,3 +225,4 @@ class GenAIService:
 
 # Global instance
 genai_service = GenAIService()
+

@@ -1,8 +1,16 @@
+"""Recommendation service.
+
+Thin orchestration around vector search results and lightweight re-scoring.
+"""
+
 from typing import List, Dict, Optional, Tuple
-from services.product_service import product_service
-from core.config import settings
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+
+# Local services/config
+from core.config import settings
+from services.product_service import product_service
 
 class RecommendationService:
     def __init__(self):
@@ -41,7 +49,10 @@ class RecommendationService:
             
             # Apply additional filtering and scoring
             filtered_products = []
+            print(f"DEBUG: Current similarity threshold: {settings.SIMILARITY_THRESHOLD}")
+            print(f"DEBUG: Found {len(similar_products)} similar products")
             for product in similar_products:
+                print(f"DEBUG: Product {product.get('name', 'Unknown')} - Similarity: {product['similarity_score']:.3f}")
                 # Apply similarity threshold
                 if product['similarity_score'] >= settings.SIMILARITY_THRESHOLD:
                     # Add recommendation metadata
@@ -49,6 +60,10 @@ class RecommendationService:
                         query, product, product['similarity_score']
                     )
                     filtered_products.append(product)
+                else:
+                    print(f"DEBUG: Filtered out due to low similarity: {product['similarity_score']:.3f} < {settings.SIMILARITY_THRESHOLD}")
+            
+            print(f"DEBUG: After filtering: {len(filtered_products)} products")
             
             # Sort by similarity score and return top_k
             filtered_products.sort(key=lambda x: x['similarity_score'], reverse=True)
@@ -211,3 +226,4 @@ class RecommendationService:
 
 # Global instance
 recommendation_service = RecommendationService()
+

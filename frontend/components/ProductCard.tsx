@@ -21,6 +21,9 @@ interface ProductCardProps {
   product: Product;
 }
 
+/**
+ * Compact product card with optional AI-generated description.
+ */
 export default function ProductCard({ product }: ProductCardProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedDescription, setGeneratedDescription] = useState<string | null>(null);
@@ -50,11 +53,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   const getSimilarityColor = (score?: number) => {
-    if (!score) return "text-gray-500";
-    if (score >= 0.9) return "text-green-600";
-    if (score >= 0.8) return "text-blue-600";
-    if (score >= 0.7) return "text-yellow-600";
-    return "text-gray-500";
+    if (!score) return "text-muted-foreground";
+    if (score >= 0.9) return "text-green-500";
+    if (score >= 0.8) return "text-primary";
+    if (score >= 0.7) return "text-yellow-500";
+    return "text-muted-foreground";
   };
 
   return (
@@ -68,7 +71,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className="capitalize">{product.category}</span>
           <span>•</span>
           <div className="flex items-center gap-1">
@@ -91,15 +94,15 @@ export default function ProductCard({ product }: ProductCardProps) {
               }}
             />
           ) : (
-            <div className="w-full h-32 bg-gray-100 rounded-md flex items-center justify-center">
-              <span className="text-gray-400 text-sm">No image available</span>
+            <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center">
+              <span className="text-muted-foreground text-sm">No image available</span>
             </div>
           )}
         </div>
 
         {/* Description */}
         <div className="mb-3">
-          <p className="text-sm text-gray-700 line-clamp-3">
+          <p className="text-sm text-foreground line-clamp-3">
             {showGenerated && generatedDescription 
               ? generatedDescription 
               : product.description
@@ -109,8 +112,8 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         {/* Recommendation Reason */}
         {product.recommendation_reason && (
-          <div className="mb-3 p-2 bg-blue-50 rounded-md">
-            <p className="text-xs text-blue-700">
+          <div className="mb-3 p-2 bg-primary/10 rounded-md">
+            <p className="text-xs text-primary">
               <Star className="h-3 w-3 inline mr-1" />
               {product.recommendation_reason}
             </p>
@@ -127,7 +130,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         >
           {isGenerating ? (
             <div className="flex items-center gap-2">
-              <div className="animate-spin h-3 w-3 border-2 border-gray-300 border-t-gray-600 rounded-full"></div>
+              <div className="animate-spin h-3 w-3 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full"></div>
               <span>Generating...</span>
             </div>
           ) : (
@@ -153,3 +156,4 @@ export default function ProductCard({ product }: ProductCardProps) {
     </Card>
   );
 }
+
