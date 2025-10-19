@@ -1,0 +1,21 @@
+fastapi
+uvicorn
+python-dotenv
+langchain
+openai
+python-multipart
+langchain_community
+pinecone-client
+
+# ML and Data Science libraries
+transformers
+torch
+scikit-learn
+pandas
+numpy
+sentence-transformers
+
+# Additional utilities
+aiofiles
+python-multipart
+pydantic
